@@ -1,11 +1,11 @@
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController), typeof(PlayerInput))]
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private float playerSpeed = 2f;
+    [SerializeField] private float playerWalkSpeed = 2f;
+    [SerializeField] private float playerRunSpeed = 4f;
     [SerializeField] private float gravityValue = -9.81f;
     [SerializeField] private float jumpHeight = 1.0f;
 
@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
 
     private InputAction moveAction;
     private InputAction jumpAction;
+    private InputAction runAction;
 
     private void Start()
     {
@@ -25,6 +26,7 @@ public class PlayerController : MonoBehaviour
         cameraTransform = Camera.main.transform;
         moveAction = playerInput.actions["Move"];
         jumpAction = playerInput.actions["Jump"];
+        runAction = playerInput.actions["Run"];
 
         Cursor.lockState = CursorLockMode.Locked;
     }
@@ -39,8 +41,10 @@ public class PlayerController : MonoBehaviour
         Vector3 move = new Vector3(input.x, 0, input.y);
         move = move.x * cameraTransform.right.normalized + move.z * cameraTransform.forward.normalized;
         move.y = 0f;
-        controller.Move(move * Time.deltaTime * playerSpeed);
 
+        var speed = runAction.IsPressed() ? playerRunSpeed : playerWalkSpeed;
+        controller.Move(move * Time.deltaTime * speed);
+        
         if (jumpAction.triggered && groundedPlayer)
         {
             playerVelocity.y += Mathf.Sqrt(jumpHeight * -3f * gravityValue);
